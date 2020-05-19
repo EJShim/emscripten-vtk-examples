@@ -1,3 +1,7 @@
+# These examples cannot be run for now
+
+ For checking VTK update
+
 # Building WebAssembly examples with rendering
 
 This example aims to provide a base example on how to create an example using
