@@ -9,6 +9,7 @@
 #include "vtkRenderer.h"
 #include "vtkSDL2OpenGLRenderWindow.h"
 #include "vtkSDL2RenderWindowInteractor.h"
+#include <vtkCylinderSource.h>
 
 #include <vtkPropPicker.h>
 
@@ -94,8 +95,16 @@ int main(int argc, char* argv[])
   vtkNew<vtkConeSource> coneSource;
   coneSource->Update();
 
+    // Create a sphere
+    vtkSmartPointer<vtkCylinderSource> cylinderSource =
+    vtkSmartPointer<vtkCylinderSource>::New();
+    cylinderSource->SetCenter(0.0, 0.0, 0.0);
+    cylinderSource->SetRadius(5.0);
+    cylinderSource->SetHeight(7.0);
+    cylinderSource->SetResolution(100);
+
   vtkNew<vtkPolyDataMapper> mapper;
-  mapper->SetInputConnection(coneSource->GetOutputPort());
+  mapper->SetInputConnection(cylinderSource->GetOutputPort());
 
   vtkNew<vtkActor> actor;
   actor->SetMapper(mapper);
@@ -107,7 +116,7 @@ int main(int argc, char* argv[])
   renderer->AddActor(actor);
 
   // Start rendering app
-  renderer->SetBackground(0.8, 0.3, 0.4);
+  renderer->SetBackground(.1, .3, .2);
 
 
   // Start event loop
