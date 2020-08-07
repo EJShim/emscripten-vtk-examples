@@ -5,12 +5,13 @@
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkNew.h"
 #include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
+//#include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
 #include <vtkSTLReader.h>
 #include <vtkXMLPolyDataReader.h>
 #include <vtkPropPicker.h>
-
+#include <vtkOpenGLPolyDataMapper.h>
+#include <vtkPolyDataNormals.h>
 
 #ifdef EMSCRIPTEN
 #include "vtkSDL2OpenGLRenderWindow.h"
@@ -59,6 +60,16 @@ vtkStandardNewMacro(MouseInteractorStyle2);
 
 
 
+std::string GetStringFromFile(char* filepath){
+
+	std::ifstream t(filepath);
+	std::string result((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+
+	return result;
+
+}
+
+
 
 // ----------------------------------------------------------------------------
 // Static objects
@@ -87,31 +98,35 @@ int main(int argc, char* argv[])
 	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
 	#endif
 
-	renderWindowInteractor->SetRenderWindow(renderWindow);
-	
+	renderWindowInteractor->SetRenderWindow(renderWindow);	
 	vtkSmartPointer<vtkInteractorStyleTrackballCamera> style = vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New();
 	renderWindowInteractor->SetInteractorStyle(style);
-	style->SetDefaultRenderer(renderer);
+	style->SetDefaultRenderer(renderer);	
+
 	
-
-	//#ifdef EMSCRIPTEN
-	std::string filePath = "./resources/sample.stl";
-
-
-	// std::ifstream t("resources/sample1.vtp");
-	// std::string xmlString((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-
 
 	vtkSmartPointer<vtkXMLPolyDataReader> xmlreader =  vtkSmartPointer<vtkXMLPolyDataReader>::New();	
 	xmlreader->SetFileName("./resources/sample1.vtp");
 	xmlreader->Update();
 
-	vtkSmartPointer<vtkSTLReader> reader = vtkSmartPointer<vtkSTLReader>::New();	
-	reader->SetFileName(filePath.c_str());
-	reader->Update();
 	
-	vtkNew<vtkPolyDataMapper> mapper;
-	mapper->SetInputData(xmlreader->GetOutput());
+
+	//Get Polydata
+	vtkSmartPointer<vtkPolyData> polydata = xmlreader->GetOutput();
+	vtkSmartPointer<vtkPolyDataNormals> normalGenerator = vtkSmartPointer<vtkPolyDataNormals>::New();
+	normalGenerator->SetInputData(polydata);
+	normalGenerator->ComputePointNormalsOn();
+	normalGenerator->ComputeCellNormalsOff();
+	normalGenerator->Update();
+	polydata = normalGenerator->GetOutput();
+
+
+	//Mapper with shader?
+	std::string fsCode = GetStringFromFile("./resources/shaders/fragment.glsl");
+	std::cout << fsCode << std::endl;
+	vtkNew<vtkOpenGLPolyDataMapper> mapper;
+	mapper->SetFragmentShaderCode(fsCode.c_str());
+	mapper->SetInputData(polydata);
 	
 	vtkNew<vtkActor> actor;
 	actor->SetMapper(mapper);
