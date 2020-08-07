@@ -17,7 +17,7 @@
 #include "vtkRenderer.h"
 #include "vtkSDL2OpenGLRenderWindow.h"
 #include "vtkSDL2RenderWindowInteractor.h"
-#include <vtkGPUVolumeRayCastMapper.h>
+#include <vtkOpenGLGPUVolumeRayCastMapper.h>
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -76,7 +76,8 @@ void CreateImageData(vtkImageData* imageData)
 }
 
 
-/////////////////////////////////////
+/////////////////////////////////////--------------
+
 
 
 // ----------------------------------------------------------------------------
@@ -96,8 +97,7 @@ EM_BOOL resize_window(int eventType, const EmscriptenUiEvent* e, void* userData)
 
 // ----------------------------------------------------------------------------
 // Main
-// ----------------------------------------------------------------------------
-
+// --------------------------------------------------------------
 int main(int argc, char* argv[])
 {
 
@@ -121,41 +121,42 @@ int main(int argc, char* argv[])
   CreateImageData(imageData);
 
 
-  vtkSmartPointer<vtkGPUVolumeRayCastMapper> volumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
+  vtkSmartPointer<vtkOpenGLGPUVolumeRayCastMapper> volumeMapper = vtkSmartPointer<vtkOpenGLGPUVolumeRayCastMapper>::New();
   volumeMapper->SetBlendModeToComposite();
   volumeMapper->SetInputData(imageData);
 
-  // vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
-  // volumeProperty->ShadeOff();
-  // volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
+  vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+  volumeProperty->ShadeOff();
+  volumeProperty->SetInterpolationType(VTK_LINEAR_INTERPOLATION);
 
-  // vtkSmartPointer<vtkPiecewiseFunction> compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
-  // compositeOpacity->AddPoint(0.0,0.0);
-  // compositeOpacity->AddPoint(80.0,1.0);
-  // compositeOpacity->AddPoint(80.1,0.0);
-  // compositeOpacity->AddPoint(255.0,0.0);
-  // volumeProperty->SetScalarOpacity(compositeOpacity); // composite first.
+  vtkSmartPointer<vtkPiecewiseFunction> compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
+  compositeOpacity->AddPoint(0.0,0.0);
+  compositeOpacity->AddPoint(80.0,1.0);
+  compositeOpacity->AddPoint(80.1,0.0);
+  compositeOpacity->AddPoint(255.0,0.0);
+  volumeProperty->SetScalarOpacity(compositeOpacity); // composite first.
 
 
   
-  // vtkSmartPointer<vtkColorTransferFunction> color =  vtkSmartPointer<vtkColorTransferFunction>::New();
-  // color->AddRGBPoint(0.0  ,0.0,0.0,1.0);
-  // color->AddRGBPoint(40.0  ,1.0,0.0,0.0);
-  // color->AddRGBPoint(255.0,1.0,1.0,1.0);
-  // volumeProperty->SetColor(color);
+  vtkSmartPointer<vtkColorTransferFunction> color =  vtkSmartPointer<vtkColorTransferFunction>::New();
+  color->AddRGBPoint(0.0  ,0.0,0.0,1.0);
+  color->AddRGBPoint(40.0  ,1.0,0.0,0.0);
+  color->AddRGBPoint(255.0,1.0,1.0,1.0);
+  volumeProperty->SetColor(color);
 
 
-  // vtkSmartPointer<vtkVolume> volume =  vtkSmartPointer<vtkVolume>::New();
-  // volume->SetMapper(volumeMapper);
-  // volume->SetProperty(volumeProperty);
+  vtkSmartPointer<vtkVolume> volume =  vtkSmartPointer<vtkVolume>::New();
+  volume->SetMapper(volumeMapper);
+  volume->SetProperty(volumeProperty);
 
 
-  // renderer->AddViewProp(volume);
+  renderer->AddViewProp(volume);
 
 
   
   // Start rendering app
-  renderer->SetBackground(0.8, 0.3, 0.4);
+  renderer->SetBackground(0.2, 0.3, 0.4);
+  renderer->SetBackground2(0.0, 0.0, 0.0);
   renderWindow->SetSize(300, 300);
 
   // Attach Window Resize Callback
