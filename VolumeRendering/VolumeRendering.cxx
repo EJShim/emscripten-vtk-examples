@@ -16,6 +16,8 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
 #include <vtkOpenGLGPUVolumeRayCastMapper.h>
+#include <vtkImageCast.h>
+#include <vtkImageShiftScale.h>
 
 
 #ifdef EMSCRIPTEN
@@ -35,7 +37,6 @@ PURPOSE.  See the above copyright notice for more information.
 #include <vtkPointData.h>
 #include <vtkImageShiftScale.h>
 #include <vtkThreadedImageAlgorithm.h>
-#include <vtkSmartVolumeMapper.h>
 #include <vtkVolumeProperty.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkColorTransferFunction.h>
@@ -74,7 +75,7 @@ void CreateImageData(vtkImageData* imageData)
 		magnitude=1.0;
 	}
 	t->SetScale(255.0/magnitude);
-	t->SetOutputScalarTypeToUnsignedChar();
+	t->SetOutputScalarTypeToUnsignedShort();
 	
 	t->Update();
 	
@@ -110,15 +111,18 @@ static vtkRenderWindow* renderWindow = vtkRenderWindow::New();
 // Main
 // --------------------------------------------------------------
 int main(int argc, char* argv[])
-{
+{	
+	
+
 	// Create a renderer and interactor
 	vtkNew<vtkRenderer> renderer;
 	renderWindow->AddRenderer(renderer);
 	
 	#ifdef EMSCRIPTEN
-	vtkNew<vtkSDL2RenderWindowInteractor> renderWindowInteractor;
+		vtkThreadedImageAlgorithm::SetGlobalDefaultEnableSMP(true);
+		vtkNew<vtkSDL2RenderWindowInteractor> renderWindowInteractor;
 	#else
-	vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
+		vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
 	#endif
 	renderWindowInteractor->SetRenderWindow(renderWindow);
 	
@@ -135,16 +139,29 @@ int main(int argc, char* argv[])
 	
 	//Reade ImageData
 	vtkSmartPointer<vtkXMLImageDataReader> reader = vtkSmartPointer<vtkXMLImageDataReader>::New();
-	reader->SetFileName("./resources/image.vti");
+	reader->SetFileName("./resources/d2.vti");
 	reader->Update();
-    imageData = reader->GetOutput();    
-	
-	
+	imageData = reader->GetOutput();    
 	double* range = imageData->GetPointData()->GetScalars()->GetRange();
 	std::cout << range[0] << "," << range[1] << std::endl;
+
+	#ifdef EMSCRIPTEN
+	vtkSmartPointer<vtkImageShiftScale> converter = vtkSmartPointer<vtkImageShiftScale>::New();
+	converter->SetInputData(imageData);
+	converter->SetShift(-range[0]);
+	converter->SetScale(255.0/(range[1]-range[0]));
+	converter->SetOutputScalarTypeToUnsignedChar();
+	converter->Update();
+	
+	
+	imageData = converter->GetOutput();
+	range = imageData->GetPointData()->GetScalars()->GetRange();
+	std::cout << range[0] << "," << range[1] << std::endl;
+	#endif
+
 	
 	vtkSmartPointer<vtkOpenGLGPUVolumeRayCastMapper> volumeMapper = vtkSmartPointer<vtkOpenGLGPUVolumeRayCastMapper>::New();
-	volumeMapper->SetBlendModeToComposite();
+	volumeMapper->SetBlendModeToMaximumIntensity();
 	volumeMapper->SetInputData(imageData);
 	
 	vtkSmartPointer<vtkVolumeProperty> volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
@@ -153,15 +170,19 @@ int main(int argc, char* argv[])
 	
 	vtkSmartPointer<vtkPiecewiseFunction> compositeOpacity = vtkSmartPointer<vtkPiecewiseFunction>::New();
 	compositeOpacity->AddPoint(range[0], 0.0);
+	compositeOpacity->AddPoint((range[1]-range[0]) / 10, 1.0);
 	compositeOpacity->AddPoint(range[1], 1.0);
 	volumeProperty->SetScalarOpacity(compositeOpacity); // composite first.
 	
 	
 	
 	vtkSmartPointer<vtkColorTransferFunction> color =  vtkSmartPointer<vtkColorTransferFunction>::New();
-	color->AddRGBPoint(range[0]  ,0.0,0.5,0.0);
+	color->AddRGBPoint(range[0]  ,0.0,0.0,0.0);	
+	color->AddRGBPoint((range[1]-range[0]) / 10, 1.0, 1.0, 1.0);
 	color->AddRGBPoint(range[1] ,1.0,1.0,1.0);
 	volumeProperty->SetColor(color);
+
+	
 	
 	
 	vtkSmartPointer<vtkVolume> volume =  vtkSmartPointer<vtkVolume>::New();
