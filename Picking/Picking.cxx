@@ -5,7 +5,7 @@
 #include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkNew.h"
 #include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
+#include <vtkOpenGLPolyDataMapper.h>
 #include "vtkRenderer.h"
 #include "vtkSDL2OpenGLRenderWindow.h"
 #include "vtkSDL2RenderWindowInteractor.h"
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     cylinderSource->SetHeight(7.0);
     cylinderSource->SetResolution(100);
 
-  vtkNew<vtkPolyDataMapper> mapper;
+  vtkNew<vtkOpenGLPolyDataMapper> mapper;  
   mapper->SetInputConnection(cylinderSource->GetOutputPort());
 
   vtkNew<vtkActor> actor;
