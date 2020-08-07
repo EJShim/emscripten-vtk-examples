@@ -1,14 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(ShaderObject)
 
-# -----------------------------------------------------------------------------
-# EMSCRIPTEN only
-# -----------------------------------------------------------------------------
-
-# if (NOT EMSCRIPTEN)
-#   message("Skipping example: This needs to run inside an Emscripten build environment")
-#   return ()
-# endif ()
 
 # -----------------------------------------------------------------------------
 # Handle VTK dependency

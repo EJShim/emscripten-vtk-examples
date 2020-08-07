@@ -17,3 +17,10 @@ services :
         command : make
         links:
             - cmake:cmake
+
+    clean :
+        image : ejvtk
+        volumes:
+            - ./:/work
+        working_dir: /work/build
+        command : make clean
