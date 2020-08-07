@@ -155,6 +155,7 @@ int main(int argc, char* argv[])
 
   
   // Start rendering app
+  renderer->SetGradientBackground(true);
   renderer->SetBackground(0.2, 0.3, 0.4);
   renderer->SetBackground2(0.0, 0.0, 0.0);
   renderWindow->SetSize(300, 300);
