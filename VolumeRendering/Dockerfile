@@ -1,5 +1,4 @@
 FROM kitware/itk-js-vtk:latest
-MAINTAINER ejshim@imagoworks.ai
 
 WORKDIR /
 
@@ -13,6 +12,7 @@ RUN git clone https://gitlab.kitware.com/vtk/VTK.git &&  \
     git submodule update --init --recursive &&   \
     cd ../ &&   \
     mkdir VTK-build &&   \
+    mkdir VTK-install &&   \
     cd VTK-build &&   \
     cmake   -G Ninja     \
             -DCMAKE_BUILD_TYPE:STRING=Release     \
@@ -26,6 +26,7 @@ RUN git clone https://gitlab.kitware.com/vtk/VTK.git &&  \
             -DVTK_USE_SDL2:BOOL=ON     \
             -DVTK_NO_PLATFORM_SOCKETS:BOOL=ON \
             -DVTK_MODULE_ENABLE_VTK_hdf5:STRING=NO      \
+            -DCMAKE_INSTALL_PREFIX:PATH=/VTK-install      \
             ../VTK &&   \
-            ninja -j7 &&   find . -name '*.o' -delete &&   cd .. && chmod -R 777 VTK-build
+            ninja install -j7 &&   find . -name '*.o' -delete &&   cd .. && chmod -R 777 VTK-build
 WORKDIR /work

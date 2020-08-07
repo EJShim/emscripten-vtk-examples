@@ -1,1 +1,3 @@
 buildcxx/
+.devcontainer/
+.vscode/
