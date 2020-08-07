@@ -17,6 +17,7 @@
 #include "vtkRenderer.h"
 #include "vtkSDL2OpenGLRenderWindow.h"
 #include "vtkSDL2RenderWindowInteractor.h"
+#include <vtkGPUVolumeRayCastMapper.h>
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
   CreateImageData(imageData);
 
 
-  vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+  vtkSmartPointer<vtkGPUVolumeRayCastMapper> volumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
   volumeMapper->SetBlendModeToComposite();
   volumeMapper->SetInputData(imageData);
 
