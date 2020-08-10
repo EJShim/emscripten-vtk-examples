@@ -7,15 +7,20 @@
 #include "vtkPolyData.h"
 #include <vtkOpenGLPolyDataMapper.h>
 #include "vtkRenderer.h"
-#include "vtkSDL2OpenGLRenderWindow.h"
-#include "vtkSDL2RenderWindowInteractor.h"
 #include <vtkCylinderSource.h>
-
 #include <vtkPropPicker.h>
 
+
+
+#ifdef EMSCRIPTEN
 #include <emscripten.h>
 #include <emscripten/html5.h>
-
+#include "vtkSDL2OpenGLRenderWindow.h"
+#include "vtkSDL2RenderWindowInteractor.h"
+#else
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#endif
 
 
 // Handle mouse events
@@ -30,13 +35,17 @@ class MouseInteractorStyle2 : public vtkInteractorStyleTrackballCamera
       int* clickPos = this->GetInteractor()->GetEventPosition();
 
 
+      std::cout << "clicked Position : " << ":" << clickPos[0] << "," << clickPos[1] << std::endl;
+      vtkRenderer* renderer = this->GetDefaultRenderer();
+
+
       // Pick from this location.
       vtkSmartPointer<vtkPropPicker>  picker = vtkSmartPointer<vtkPropPicker>::New();
-      picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
+      picker->Pick(clickPos[0], clickPos[1], 0, renderer);
 
-      double* pos = picker->GetPickPosition();
-      std::cout << "Pick position (world coordinates) is: " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
-      std::cout << "Picked actor: " << picker->GetActor() << std::endl;
+      // double* pos = picker->GetPickPosition();
+      // std::cout << "Pick position (world coordinates) is: " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+      // std::cout << "Picked actor: " << picker->GetActor() << std::endl;
 
       // std::cout << "Picked actor: " << picker->GetActor() << std::endl;
       // //Create a sphere
@@ -71,8 +80,11 @@ vtkStandardNewMacro(MouseInteractorStyle2);
 // Static objects
 // ----------------------------------------------------------------------------
 
+#ifdef EMSCRIPTEN
 static vtkSDL2OpenGLRenderWindow* renderWindow = vtkSDL2OpenGLRenderWindow::New();
-
+#else
+static vtkRenderWindow* renderWindow = vtkRenderWindow::New();
+#endif
 
 // ----------------------------------------------------------------------------
 // Main
@@ -82,11 +94,15 @@ int main(int argc, char* argv[])
 {
   // Create a renderer and interactor
   vtkNew<vtkRenderer> renderer;
-  // renderWindow->SetMultiSamples(0);
   renderWindow->AddRenderer(renderer);
-  vtkNew<vtkSDL2RenderWindowInteractor> renderWindowInteractor;
-  renderWindowInteractor->SetRenderWindow(renderWindow);
 
+  #ifdef EMSCRIPTEN
+    vtkNew<vtkSDL2RenderWindowInteractor> renderWindowInteractor;
+  #else
+    vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  #endif
+
+  renderWindowInteractor->SetRenderWindow(renderWindow);
   vtkSmartPointer<MouseInteractorStyle2> style = vtkSmartPointer<MouseInteractorStyle2>::New();
   renderWindowInteractor->SetInteractorStyle(style);
   style->SetDefaultRenderer(renderer);
