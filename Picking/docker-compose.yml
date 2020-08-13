@@ -7,7 +7,7 @@ services :
         volumes:
             - ./:/work
         working_dir: /work/build
-        command : cmake .. -DVTK_DIR=/VTK-install/lib/cmake/vtk-9.0
+        command : cmake .. -DVTK_DIR:PATH=/VTK-build
 
     make :
         image : ejvtk
