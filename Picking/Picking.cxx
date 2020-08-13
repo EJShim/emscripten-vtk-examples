@@ -11,7 +11,15 @@
 #include <vtkPropPicker.h>
 #include <vtkCamera.h>
 #include <vtkCoordinate.h>
-
+#include <vtkVector.h>
+#include <vtkMatrix4x4.h>
+#include <vtkMath.h>
+#include <vtkOBBTree.h>
+#include <vtkOpenGLSphereMapper.h>
+#include <vtkSphereSource.h>
+#include <vtkProperty.h>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
@@ -24,6 +32,9 @@
 #endif
 
 
+vtkSmartPointer<vtkActor> actor;
+vtkSmartPointer<vtkOBBTree> obbTree;
+
 // Handle mouse events
 class MouseInteractorStyle2 : public vtkInteractorStyleTrackballCamera
 {
@@ -33,44 +44,66 @@ public:
 
 	virtual void OnLeftButtonDown() override
 	{
-		int* clickPos = this->GetInteractor()->GetEventPosition();
-
-		vtkSmartPointer<vtkCoordinate> coordinate = vtkSmartPointer<vtkCoordinate>::New();
-
-
-		int displayPos[3] = {clickPos[0], clickPos[1], 0};
-
-
-
-		vtkRenderer* renderer = this->GetDefaultRenderer();
-
-
-		//Compute display to world
-
-
-
-
-
-		// std::cout << "Picked actor: " << picker->GetActor() << std::endl;
-
-		// std::cout << "Picked actor: " << picker->GetActor() << std::endl;
-		// //Create a sphere
-		// vtkSmartPointer<vtkSphereSource> sphereSource = vtkSmartPointer<vtkSphereSource>::New();
-		// sphereSource->SetCenter(pos[0], pos[1], pos[2]);
-		// sphereSource->SetRadius(0.1);
-
-		// //Create a mapper and actor
-		// vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-		// mapper->SetInputConnection(sphereSource->GetOutputPort());
-
-		// vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-		// actor->SetMapper(mapper);
-
-
-		// //this->GetInteractor()->GetRenderWindow()->GetRenderers()->GetDefaultRenderer()->AddActor(actor);
-		// this->GetDefaultRenderer()->AddActor(actor);
 		// Forward events
 		vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+
+
+		int* clickPos = this->GetInteractor()->GetEventPosition();
+		vtkRenderer* renderer = this->GetDefaultRenderer();
+		vtkCamera* camera = renderer->GetActiveCamera();
+		
+
+		//Compute display to world
+		vtkSmartPointer<vtkCoordinate> coordinate = vtkSmartPointer<vtkCoordinate>::New();
+		coordinate->SetCoordinateSystemToDisplay();
+		coordinate->SetValue(clickPos[0], clickPos[1], 0);
+		
+		vtkVector3d worldPos(coordinate->GetComputedWorldValue(renderer));
+		vtkVector3d cameraPos(camera->GetPosition());
+		vtkVector3d pickVec;
+
+		vtkMath::Subtract(worldPos.GetData(), cameraPos.GetData(), pickVec.GetData());
+		pickVec.Normalize();
+
+		double clippingLength = camera->GetClippingRange()[1] - camera->GetClippingRange()[0];
+		double cosMax = cos(camera->GetViewAngle() * 0.5 * M_PI / 180.0);
+		double maxLength = clippingLength / cosMax;
+
+		vtkVector3d p1 = worldPos;
+
+
+		vtkMath::MultiplyScalar(pickVec.GetData(), maxLength );
+		vtkVector3d p2;
+		vtkMath::Add(worldPos.GetData(), pickVec.GetData(), p2.GetData());
+
+
+
+		//OBBTree Pick
+		vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+		obbTree->IntersectWithLine(p1.GetData(), p2.GetData(), pts, NULL );
+
+
+		if(pts->GetNumberOfPoints() == 0) return;
+
+		vtkSmartPointer<vtkSphereSource> sphereSource = vtkSmartPointer<vtkSphereSource>::New();
+		sphereSource->SetCenter(pts->GetPoint(0));
+		sphereSource->Update();
+
+
+		vtkSmartPointer<vtkPolyData> polydata = sphereSource->GetOutput();
+
+		
+		vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+		mapper->SetInputData(polydata);
+
+		vtkSmartPointer<vtkActor> pickActor = vtkSmartPointer<vtkActor>::New();
+		pickActor->SetMapper(mapper);
+		pickActor->GetProperty()->SetColor(1.0, 0.0, 0.0);
+		pickActor->GetProperty()->SetPointSize(10);
+
+
+		renderer->AddActor(pickActor);
+		
 	}
   
 private:
@@ -124,11 +157,17 @@ int main(int argc, char* argv[])
 	cylinderSource->SetRadius(5.0);
 	cylinderSource->SetHeight(7.0);
 	cylinderSource->SetResolution(100);
+	cylinderSource->Update();
+
+	//Initialize OBBTree
+	obbTree = vtkSmartPointer<vtkOBBTree>::New();
+	obbTree->SetDataSet(cylinderSource->GetOutput());
+	obbTree->BuildLocator();
 
 	vtkNew<vtkOpenGLPolyDataMapper> mapper;  
-	mapper->SetInputConnection(cylinderSource->GetOutputPort());
+	mapper->SetInputData(cylinderSource->GetOutput());
 
-	vtkNew<vtkActor> actor;
+	actor = vtkSmartPointer<vtkActor>::New();
 	actor->SetMapper(mapper);
 
 
