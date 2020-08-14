@@ -55,6 +55,7 @@ if(EMSCRIPTEN)
     "SHELL:-s MODULARIZE=1"
     "SHELL:-s USE_PTHREADS=0"
     "SHELL:-s WASM=1"
+    "SHELL:--preload-file resources"
   )
 
 
@@ -90,5 +91,20 @@ if(EMSCRIPTEN)
       ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_CURRENT_SOURCE_DIR}/index.html"
         $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>
+
+    PRE_BUILD
+    COMMAND
+      ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+        $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/resources
   )
-endif()
+  else()
+  add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME} 
+    PRE_BUILD
+    COMMAND
+      ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+        $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/resources
+  )
+  endif()
