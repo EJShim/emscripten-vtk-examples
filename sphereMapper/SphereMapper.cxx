@@ -19,6 +19,7 @@
 #include <iostream>
 
 
+
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -56,19 +57,19 @@ int main(int, char *[])
 
 	// Visualization vtkOpenGLPolyDataMapper
 	#ifdef EMSCRIPTEN
-	vtkSmartPointer<vtkOpenGLSphereMapper> mapper = vtkSmartPointer<vtkOpenGLSphereMapper>::New();
+	vtkSmartPointer<vtkOpenGLPolyDataMapper> mapper = vtkSmartPointer<vtkOpenGLPolyDataMapper>::New();
 
 	#else
-	vtkSmartPointer<vtkOpenGLSphereMapper> mapper = vtkSmartPointer<vtkOpenGLSphereMapper>::New();	
+	vtkSmartPointer<vtkOpenGLPolyDataMapper> mapper = vtkSmartPointer<vtkOpenGLPolyDataMapper>::New();	
 	#endif
 	mapper->SetInputData(polydata);
 
-	std::string vs = GetStringFromFile("resources/jsglsl/vtkSphereMapperVS.glsl");
-	std::string fs = GetStringFromFile("resources/jsglsl/vtkPolyDataFS.glsl");	
+	std::string vs = GetStringFromFile("resources/glsl/vtkPointGaussianVS.glsl");
+	std::string gs = GetStringFromFile("resources/glsl/vtkSphereMapperGS.glsl");	
 
 
-	mapper->SetVertexShaderCode(vs.c_str());
-	//mapper->SetFragmentShaderCode(fs.c_str());	
+	// mapper->SetVertexShaderCode(vs.c_str());
+	// mapper->SetGeometryShaderCode(gs.c_str());	
 	
 
 
