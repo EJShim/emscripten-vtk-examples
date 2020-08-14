@@ -89,7 +89,6 @@ void main()
   //VTK::Normal::Impl
 
   //VTK::Light::Impl
-
   //VTK::TCoord::Impl
 
   if (gl_FragData[0].a <= 0.0)
@@ -104,4 +103,3 @@ void main()
   // handle coincident offsets
   //VTK::Coincident::Impl
 }
-;

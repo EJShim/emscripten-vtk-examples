@@ -21,12 +21,13 @@ else()
   message (STATUS "VTK_VERSION: ${VTK_VERSION}")
 endif ()
 
+set(CMAKE_INCLUDE_CURRENT_DIR True)
 
 # -----------------------------------------------------------------------------
 # Compile example code
 # -----------------------------------------------------------------------------
 
-add_executable(${CMAKE_PROJECT_NAME} SphereMapper.cxx)
+add_executable(${CMAKE_PROJECT_NAME} SphereMapper.cxx IWOpenGLSphereMapper)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
   PRIVATE

@@ -36,7 +36,7 @@ out float radiusVCVSOutput;
 //VTK::Camera::Dec
 
 // picking support
-//VTK::Picking::Dec
+//VTK::Picking::De
 
 void main()
 {
@@ -45,12 +45,11 @@ void main()
   //VTK::Normal::Impl
 
   //VTK::TCoord::Impl
-
+  
   //VTK::Clip::Impl
 
   radiusVCVSOutput = radiusMC;
 
   gl_Position = MCVCMatrix * vertexMC;
-
   //VTK::Picking::Impl
 }

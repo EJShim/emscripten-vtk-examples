@@ -15,8 +15,12 @@
 #include <vtkInteractorStyleTrackballCamera.h>
 #include <vtkSphereSource.h>
 #include <vtkOpenGLShaderProperty.h>
+#include <vtkOpenGLCamera.h>
+#include <vtkMatrix4x4.h>
 #include <fstream>
 #include <iostream>
+#include <vtkObject.h>
+#include <IWOpenGLSphereMapper.h>
 
 
 
@@ -30,6 +34,8 @@
 #include <vtkRenderWindowInteractor.h>
 #endif
 
+
+
 std::string GetStringFromFile(char* filepath){
 
 	std::ifstream t(filepath);
@@ -42,6 +48,24 @@ std::string GetStringFromFile(char* filepath){
 
 int main(int, char *[])
 {
+
+	// vtkObject::GlobalWarningDisplayOff();
+	
+	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+
+
+	#ifdef EMSCRIPTEN
+	vtkSmartPointer<vtkSDL2RenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkSDL2RenderWindowInteractor>::New();
+	vtkSmartPointer<vtkSDL2OpenGLRenderWindow> renderWindow = vtkSmartPointer<vtkSDL2OpenGLRenderWindow>::New();
+	#else
+	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+	vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+	#endif
+	renderWindow->AddRenderer(renderer);
+	renderWindowInteractor->SetRenderWindow(renderWindow);
+	renderWindowInteractor->SetInteractorStyle(vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New());
+	renderer->SetBackground(.2, .1, .01);
+	renderWindow->Render();
 
 	std::string filePath = "../test.txt";
 
@@ -57,22 +81,12 @@ int main(int, char *[])
 
 	// Visualization vtkOpenGLPolyDataMapper
 	#ifdef EMSCRIPTEN
-	vtkSmartPointer<vtkOpenGLPolyDataMapper> mapper = vtkSmartPointer<vtkOpenGLPolyDataMapper>::New();
+	vtkSmartPointer<vtkOpenGLSphereMapper> mapper = vtkSmartPointer<vtkOpenGLSphereMapper>::New();
 
 	#else
-	vtkSmartPointer<vtkOpenGLPolyDataMapper> mapper = vtkSmartPointer<vtkOpenGLPolyDataMapper>::New();	
+	vtkSmartPointer<IWOpenGLSphereMapper> mapper = vtkSmartPointer<IWOpenGLSphereMapper>::New();	
 	#endif
 	mapper->SetInputData(polydata);
-
-	std::string vs = GetStringFromFile("resources/glsl/vtkPointGaussianVS.glsl");
-	std::string gs = GetStringFromFile("resources/glsl/vtkSphereMapperGS.glsl");	
-
-
-	// mapper->SetVertexShaderCode(vs.c_str());
-	// mapper->SetGeometryShaderCode(gs.c_str());	
-	
-
-
 
 
 
@@ -83,25 +97,15 @@ int main(int, char *[])
 	actor->SetMapper(mapper);
 	actor->GetProperty()->SetPointSize(10);
 
-	vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
 
-
-	#ifdef EMSCRIPTEN
-	vtkSmartPointer<vtkSDL2RenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkSDL2RenderWindowInteractor>::New();
-	vtkSmartPointer<vtkSDL2OpenGLRenderWindow> renderWindow = vtkSmartPointer<vtkSDL2OpenGLRenderWindow>::New();
-	#else
-	vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
-	vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-	#endif
-	renderWindow->AddRenderer(renderer);
-	renderWindowInteractor->SetRenderWindow(renderWindow);
-	renderWindowInteractor->SetInteractorStyle(vtkSmartPointer<vtkInteractorStyleTrackballCamera>::New());
 
 	renderer->AddActor(actor);
-	renderer->SetBackground(.2, .1, .01);
+	renderer->ResetCamera();
 	renderWindow->Render();
 
+	std::cout << "Start" << std::endl;
 
+	renderWindowInteractor->Initialize();
 	renderWindowInteractor->Start();
 
 	return EXIT_SUCCESS;

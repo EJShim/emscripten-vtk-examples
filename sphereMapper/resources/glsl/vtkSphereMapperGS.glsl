@@ -85,6 +85,5 @@ void main()
   vertexVCGSOutput = gl_in[0].gl_Position + offset.x*base1 + offset.y*base2;
   gl_Position = VCDCMatrix * vertexVCGSOutput;
   EmitVertex();
-
   EndPrimitive();
 }
