@@ -49,6 +49,7 @@ public:
 
 
 		int* clickPos = this->GetInteractor()->GetEventPosition();
+		std::cout << clickPos[0] << "," << clickPos[1] << std::endl;
 		vtkRenderer* renderer = this->GetDefaultRenderer();
 		vtkCamera* camera = renderer->GetActiveCamera();
 		
@@ -76,8 +77,6 @@ public:
 		vtkVector3d p2;
 		vtkMath::Add(worldPos.GetData(), pickVec.GetData(), p2.GetData());
 
-
-
 		//OBBTree Pick
 		vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
 		obbTree->IntersectWithLine(p1.GetData(), p2.GetData(), pts, NULL );
@@ -102,17 +101,39 @@ public:
 		pickActor->GetProperty()->SetPointSize(10);
 
 
-		renderer->AddActor(pickActor);
-		
+		renderer->AddActor(pickActor);		
 	}
-  
-private:
-  
 };
-
 vtkStandardNewMacro(MouseInteractorStyle2);
 
 
+
+
+// Handle mouse events
+class PickerInteractorStyle : public vtkInteractorStyleTrackballCamera
+{
+public:
+	static PickerInteractorStyle* New();
+	vtkTypeMacro(PickerInteractorStyle, vtkInteractorStyleTrackballCamera);
+
+	virtual void OnLeftButtonDown() override
+	{
+		// Forward events
+		vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
+
+		int* clickPos = this->GetInteractor()->GetEventPosition();
+
+
+		// Pick from this location.
+		vtkSmartPointer<vtkPropPicker>  picker = vtkSmartPointer<vtkPropPicker>::New();
+		picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
+
+		double* pos = picker->GetPickPosition();
+		std::cout << "Pick position (world coordinates) is: " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+		std::cout << "Picked actor: " << picker->GetActor() << std::endl;
+	}
+};
+vtkStandardNewMacro(PickerInteractorStyle);
 
 
 // ----------------------------------------------------------------------------
@@ -142,7 +163,7 @@ int main(int argc, char* argv[])
 	#endif
 
 	renderWindowInteractor->SetRenderWindow(renderWindow);
-	vtkSmartPointer<MouseInteractorStyle2> style = vtkSmartPointer<MouseInteractorStyle2>::New();
+	vtkSmartPointer<PickerInteractorStyle> style = vtkSmartPointer<PickerInteractorStyle>::New();
 	renderWindowInteractor->SetInteractorStyle(style);
 	style->SetDefaultRenderer(renderer);
 

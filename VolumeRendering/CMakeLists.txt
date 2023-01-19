@@ -83,29 +83,28 @@ vtk_module_autoinit(
 # -----------------------------------------------------------------------------
 # Copy HTML to build directory
 # -----------------------------------------------------------------------------
-
 if(EMSCRIPTEN)
 add_custom_command(
-  TARGET ${CMAKE_PROJECT_NAME}
+  TARGET VolumeRendering
   POST_BUILD
   COMMAND
     ${CMAKE_COMMAND} -E copy_if_different
       "${CMAKE_CURRENT_SOURCE_DIR}/index.html"
-      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>
+      $<TARGET_FILE_DIR:VolumeRendering>
   
   PRE_BUILD
   COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       "${CMAKE_CURRENT_SOURCE_DIR}/resources"
-      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/resources
+      $<TARGET_FILE_DIR:VolumeRendering>/resources
 )
 else()
 add_custom_command(
-  TARGET ${CMAKE_PROJECT_NAME} 
+  TARGET VolumeRendering
   PRE_BUILD
   COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       "${CMAKE_CURRENT_SOURCE_DIR}/resources"
-      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/resources
+      $<TARGET_FILE_DIR:VolumeRendering>/resources
 )
 endif()

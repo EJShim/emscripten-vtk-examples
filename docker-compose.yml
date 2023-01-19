@@ -1,26 +1,26 @@
 version: '3.0'
 
 services : 
+    clean :
+        image : ejvtk:latest
+        volumes:
+            - ./:/work
+        working_dir: /work/build
+        command : make clean
+
     cmake:
-        image : ejvtk
+        image : ejvtk:latest
         build : .
         volumes:
             - ./:/work
         working_dir: /work/build
-        command : cmake .. -DVTK_DIR=/VTK-install/lib/cmake/vtk-9.0
+        command : cmake .. -DVTK_DIR=/VTK-install/lib/cmake/vtk-9.2
 
     make :
-        image : ejvtk
+        image : ejvtk:latest
         volumes:
             - ./:/work
         working_dir: /work/build
         command : make
         links:
             - cmake:cmake
-
-    clean :
-        image : ejvtk
-        volumes:
-            - ./:/work
-        working_dir: /work/build
-        command : make clean

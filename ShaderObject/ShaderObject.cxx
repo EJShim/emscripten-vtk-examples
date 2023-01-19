@@ -1,5 +1,3 @@
-
-
 #include "vtkActor.h"
 #include "vtkConeSource.h"
 #include "vtkInteractorStyleTrackballCamera.h"
@@ -12,6 +10,7 @@
 #include <vtkPropPicker.h>
 #include <vtkOpenGLPolyDataMapper.h>
 #include <vtkPolyDataNormals.h>
+#include <vtkShaderProperty.h>
 
 #ifdef EMSCRIPTEN
 #include "vtkSDL2OpenGLRenderWindow.h"
@@ -27,38 +26,6 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
-
-
-// Handle mouse events
-class MouseInteractorStyle2 : public vtkInteractorStyleTrackballCamera
-{
-public:
-	static MouseInteractorStyle2* New();
-	vtkTypeMacro(MouseInteractorStyle2, vtkInteractorStyleTrackballCamera);
-	
-	virtual void OnLeftButtonDown() override
-	{
-		int* clickPos = this->GetInteractor()->GetEventPosition();
-		
-		
-		// Pick from this location.
-		vtkSmartPointer<vtkPropPicker>  picker = vtkSmartPointer<vtkPropPicker>::New();
-		picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
-		
-		double* pos = picker->GetPickPosition();
-		std::cout << "Pick position (world coordinates) is: " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
-		std::cout << "Picked actor: " << picker->GetActor() << std::endl;
-		
-		vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
-	}
-	
-private:
-	
-};
-
-vtkStandardNewMacro(MouseInteractorStyle2);
-
-
 
 std::string GetStringFromFile(char* filepath){
 
@@ -125,11 +92,12 @@ int main(int argc, char* argv[])
 	std::string fsCode = GetStringFromFile("./resources/shaders/fragment.glsl");
 	std::cout << fsCode << std::endl;
 	vtkNew<vtkOpenGLPolyDataMapper> mapper;
-	mapper->SetFragmentShaderCode(fsCode.c_str());
+	// mapper->SetFragmentShaderCode(fsCode.c_str());
 	mapper->SetInputData(polydata);
 	
 	vtkNew<vtkActor> actor;
 	actor->SetMapper(mapper);
+	actor->GetShaderProperty()->SetFragmentShaderCode(fsCode.c_str());
 	
 	
 	std::cout << "Actor address: " << actor << std::endl;
