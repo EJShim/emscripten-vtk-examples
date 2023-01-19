@@ -29,38 +29,6 @@
 #include <fstream>
 #include <streambuf>
 
-
-// Handle mouse events
-class MouseInteractorStyle2 : public vtkInteractorStyleTrackballCamera
-{
-public:
-	static MouseInteractorStyle2* New();
-	vtkTypeMacro(MouseInteractorStyle2, vtkInteractorStyleTrackballCamera);
-	
-	virtual void OnLeftButtonDown() override
-	{
-		int* clickPos = this->GetInteractor()->GetEventPosition();
-		
-		
-		// Pick from this location.
-		vtkSmartPointer<vtkPropPicker>  picker = vtkSmartPointer<vtkPropPicker>::New();
-		picker->Pick(clickPos[0], clickPos[1], 0, this->GetDefaultRenderer());
-		
-		double* pos = picker->GetPickPosition();
-		std::cout << "Pick position (world coordinates) is: " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
-		std::cout << "Picked actor: " << picker->GetActor() << std::endl;
-		
-		vtkInteractorStyleTrackballCamera::OnLeftButtonDown();
-	}
-	
-private:
-	
-};
-
-vtkStandardNewMacro(MouseInteractorStyle2);
-
-
-
 std::string GetStringFromFile(char* filepath){
 
 	std::ifstream t(filepath);
