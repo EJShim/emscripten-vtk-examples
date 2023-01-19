@@ -12,6 +12,7 @@
 #include <vtkPropPicker.h>
 #include <vtkOpenGLPolyDataMapper.h>
 #include <vtkPolyDataNormals.h>
+#include <vtkShaderProperty.h>
 
 #ifdef EMSCRIPTEN
 #include "vtkSDL2OpenGLRenderWindow.h"
@@ -130,6 +131,7 @@ int main(int argc, char* argv[])
 	
 	vtkNew<vtkActor> actor;
 	actor->SetMapper(mapper);
+	actor->GetShaderProperty()->SetFragmentShaderCode(fsCode.c_str());
 	
 	
 	std::cout << "Actor address: " << actor << std::endl;
