@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 	std::string fsCode = GetStringFromFile("./resources/shaders/fragment.glsl");
 	std::cout << fsCode << std::endl;
 	vtkNew<vtkOpenGLPolyDataMapper> mapper;
-	mapper->SetFragmentShaderCode(fsCode.c_str());
+	// mapper->SetFragmentShaderCode(fsCode.c_str());
 	mapper->SetInputData(polydata);
 	
 	vtkNew<vtkActor> actor;

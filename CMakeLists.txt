@@ -3,3 +3,4 @@ project(WASM_VTK_RENDERNIG)
 
 add_subdirectory(VolumeRendering)
 add_subdirectory(ShaderObject)
+add_subdirectory(Picking)
