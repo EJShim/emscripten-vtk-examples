@@ -27,9 +27,9 @@ endif ()
 # Compile example code
 # -----------------------------------------------------------------------------
 
-add_executable(${CMAKE_PROJECT_NAME} ShaderObject.cxx)
+add_executable(ShaderObject ShaderObject.cxx)
 
-target_link_libraries(${CMAKE_PROJECT_NAME}
+target_link_libraries(ShaderObject
   PRIVATE
     VTK::FiltersSources
     VTK::InteractionStyle
@@ -63,12 +63,12 @@ if(EMSCRIPTEN)
   )
 
 
-  target_compile_options(${CMAKE_PROJECT_NAME}
+  target_compile_options(ShaderObject
     PUBLIC
       ${emscripten_options}
   )
 
-  target_link_options(${CMAKE_PROJECT_NAME}
+  target_link_options(ShaderObject
     PUBLIC
       ${emscripten_options}
   )
@@ -79,7 +79,7 @@ endif()
 # -----------------------------------------------------------------------------
 
 vtk_module_autoinit(
-  TARGETS  ${CMAKE_PROJECT_NAME}
+  TARGETS  ShaderObject
   MODULES  ${VTK_LIBRARIES}
 )
 
@@ -90,26 +90,26 @@ vtk_module_autoinit(
 
 if(EMSCRIPTEN)
 add_custom_command(
-  TARGET ${CMAKE_PROJECT_NAME}
+  TARGET ShaderObject
   POST_BUILD
   COMMAND
     ${CMAKE_COMMAND} -E copy_if_different
       "${CMAKE_CURRENT_SOURCE_DIR}/index.html"
-      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>
+      $<TARGET_FILE_DIR:ShaderObject>
   
   PRE_BUILD
   COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       "${CMAKE_CURRENT_SOURCE_DIR}/resources"
-      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/resources
+      $<TARGET_FILE_DIR:ShaderObject>/resources
 )
 else()
 add_custom_command(
-  TARGET ${CMAKE_PROJECT_NAME} 
+  TARGET ShaderObject 
   PRE_BUILD
   COMMAND
     ${CMAKE_COMMAND} -E copy_directory
       "${CMAKE_CURRENT_SOURCE_DIR}/resources"
-      $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/resources
+      $<TARGET_FILE_DIR:ShaderObject>/resources
 )
 endif()
