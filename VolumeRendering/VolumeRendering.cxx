@@ -1,13 +1,3 @@
-/*=========================================================================
-Program:   Visualization Toolkit
-Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-All rights reserved.
-See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
-This software is distributed WITHOUT ANY WARRANTY; without even
-the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE.  See the above copyright notice for more information.
-=========================================================================*/
-
 #include "vtkActor.h"
 #include "vtkConeSource.h"
 #include "vtkInteractorStyleTrackballCamera.h"
@@ -16,6 +6,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
 #include <vtkOpenGLGPUVolumeRayCastMapper.h>
+#include <vtkSmartVolumeMapper.h>
 #include <vtkImageCast.h>
 #include <vtkImageShiftScale.h>
 
@@ -160,7 +151,7 @@ int main(int argc, char* argv[])
 	#endif
 
 	
-	vtkSmartPointer<vtkOpenGLGPUVolumeRayCastMapper> volumeMapper = vtkSmartPointer<vtkOpenGLGPUVolumeRayCastMapper>::New();
+	vtkSmartPointer<vtkSmartVolumeMapper> volumeMapper = vtkSmartPointer<vtkSmartVolumeMapper>::New();
 	volumeMapper->SetBlendModeToMaximumIntensity();
 	volumeMapper->SetInputData(imageData);
 	
@@ -195,10 +186,9 @@ int main(int argc, char* argv[])
 	
 	
 	// Start rendering app
-	renderer->SetGradientBackground(true);
-	renderer->SetBackground(0.0, 0.0, 0.0);
-	renderer->SetBackground2(0.0, 0.0, 0.1);
-	renderWindow->SetSize(300, 300);
+	renderer->SetGradientBackground(false);
+	renderer->SetBackground(0.0, 0.1, 0.0);
+	// renderWindow->SetSize(300, 300);
 	
 	// Attach Window Resize Callback
 	

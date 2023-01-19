@@ -1,5 +1,3 @@
-
-
 #include "vtkActor.h"
 #include "vtkConeSource.h"
 #include "vtkInteractorStyleTrackballCamera.h"
